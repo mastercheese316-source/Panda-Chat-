@@ -8,7 +8,11 @@
   body{font-family:system-ui;margin:0;background:#f0f0f0;color:#111;overflow:hidden;display:flex;flex-direction:column;height:100vh;}
   header{padding:1rem;background:#222;color:#fff;text-align:center;}
   #chat{height:80vh;overflow-y:scroll;display:flex;flex-direction:column-reverse;padding:1rem;}
-  .msg{margin:0.5rem 0;border-radius:0.8em;padding:0.6em 0.8em;max-width:80%;word-wrap:break-word;}
+  server.on('upgrade', (req, socket, head) => {
+    wss.handleUpgrade(req, socket, head, (client) => {
+      wss.emit('connection', client, req);
+      });
+    });
   .me{background:#dd6;align-self:flex-end;}
   .them{background:#9cf;align-self:flex-start;}
   #input-bar{padding:1rem;background:#eee;display:flex;gap:0.5rem;}
