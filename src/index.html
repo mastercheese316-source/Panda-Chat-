@@ -32,7 +32,7 @@ const send = document.getElementById('send');
 
 const params = new URLSearchParams(window.location.search);
 const roomId = params.get('room') || 'default';
-const socket = new WebSocket(`wss://panda-chat.twilio.dev/ws/${roomId}`);
+const socket = new WebSocket(wss://${window.location.host}/ws/${roomId});
 
 socket.onmessage = ev => {
   const data = JSON.parse(ev.data);
@@ -48,9 +48,9 @@ navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
   recog.lang = 'en-US';
   recog.interimResults = false;
 
-  recog.onresult = e => {
-    const text = e.results[e.resultIndex][0].transcript.trim();
-    if (text) socket.send(JSON.stringify({type:'speak', text}));
+  recog.onresult = event => {
+   const transcript = event.results[event.results.length - 1][0].transcript.trim();
+    if (transcript) socket.send(JSON.stringify({type: 'speak', text: transcript}));
   };
   mic = document.getElementById('mic');
   mic.onclick = recog.start;
