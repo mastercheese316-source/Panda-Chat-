@@ -1,1 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PandaChat</title>
+<style>
+  body{font-family:system-ui;margin:0;background:#f0f0f0;color:#111;overflow:hidden;display:flex;flex-direction:column;height:100vh;}
+  header{padding:1rem;background:#222;color:#fff;text-align:center;}
+  #chat{height:80vh;overflow-y:scroll;display:flex;flex-direction:column-reverse;padding:1rem;}
+  .msg{margin:0.5rem 0;border-radius:0.8em;padding:0.6em 0.8em;max-width:80%;word-wrap:break-word;}
+  .me{background:#dd6;align-self:flex-end;}
+  .them{background:#9cf;align-self:flex-start;}
+  #input-bar{padding:1rem;background:#eee;display:flex;gap:0.5rem;}
+  input,button{font:inherit;border:none;border-radius:0.4em;padding:0.5em;}
+  input{flex:1;}
+  button{background:#4a4;color:white;cursor:pointer;}
+</style>
+</head>
+<body>
+<header>PandaChat</header>
+<div id="chat"></div>
+<div id="input-bar">
+  <input id="text-box" placeholder="Say something…" autocomplete="off">
+  <button id="send">Send</button>
+</div>
 
+<script>
+const chat = document.getElementById('chat');
+const box  = document.getElementById('text-box');
+const send = document.getElementById('send');
+
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get('room') || 'default';
+const socket = new WebSocket(`wss://panda-chat.twilio.dev/ws/${roomId}`);
+
+socket.onmessage = ev => {
+  const data = JSON.parse(ev.data);
+  if (data.type === 'translated') {
+    const side = data.sender === 'them' ? 'them' : 'me';
+    appendMsg(side, data.text);
+  }
+};
+
+navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
+  const recog = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recog.continuous = true;
+  recog.lang = 'en-US';
+  recog.interimResults = false;
+
+  recog.onresult = e => {
+    const text = e.results[e.resultIndex][0].transcript.trim();
+    if (text) socket.send(JSON.stringify({type:'speak', text}));
+  };
+  recog.start();
+}).catch(err => console.error('Mic error:', err));
+
+function appendMsg(side, text) {
+  const p = document.createElement('p');
+  p.className = `msg ${side}`;
+  p.textContent = text;
+  chat.prepend(p);
+}
+
+send.onclick = () => {
+  const text = box.value.trim();
+  if (text) {
+    socket.send(JSON.stringify({type:'edit', text}));
+    appendMsg('me', text);
+    box.value = '';
+  }
+};
+</script>
+</body>
+</html>
