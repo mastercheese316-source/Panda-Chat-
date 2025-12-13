@@ -76,8 +76,9 @@ send.onclick = () => {
     socket.send(JSON.stringify({type:'edit', text}));
     appendMsg('me', text);
     box.value = '';
-  }
-};
+}
+	// (blank or comment)
+	} // closes the outer <script> scope — only one brace
 </script>
 				</body>
 			</html>
