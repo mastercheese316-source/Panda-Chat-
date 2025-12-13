@@ -75,9 +75,6 @@ send.onclick = () => {
   if (text) {
     socket.send(JSON.stringify({type:'edit', text}));
     appendMsg('me', text);
-    box.value = ''; 
-  }
-}
-</script>
+    box.value='';}}</script>
 </body>
 </html>
