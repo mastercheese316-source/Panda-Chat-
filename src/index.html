@@ -70,11 +70,23 @@ function appendMsg(side, text) {
   chat.prepend(p);
 }
 
-send.onclick = () => {
-  const text = box.value.trim();
-  if (text) {
-    socket.send(JSON.stringify({type:'edit', text}));
-    appendMsg('me', text);
-    box.value='';}}}</script>
-</body>
-</html>
+<script> socket.onmessage = (evt) => { const data = JSON.parse(evt.data);
+if (data.type === 'msg') { appendMsg(data.user, data.text);
+} else if (data.type === 'edit') { const last = document.querySelector('.me:last-child');
+last.textContent = data.text; } };
+const box = document.getElementById('box');
+const send = document.getElementById('send'); const mic = document.getElementById('mic');
+function appendMsg(user, text) { const div = document.createElement('div');
+div.className = user; div.textContent = text;
+document.body.insertBefore(div, send);
+} send.onclick = () => { const text = box.value.trim();
+if (text) { socket.send(JSON.stringify({type:'edit', text}));
+appendMsg('me', text);
+box.value = '';
+}
+} 
+mic.onclick = () => { const recog = new SpeechRecognition();
+recog.lang = 'en-US'; recog.onresult = e => { const text = e.results[0][0].transcript;
+socket.send(JSON.stringify({type:'edit', text}));
+appendMsg('me', text); }; recog.onerror = () => recog = null; recog.start(); }; </script>
+																
