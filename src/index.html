@@ -48,8 +48,7 @@ navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
   recog.lang = 'en-US';
   recog.interimResults = false;
 
-  recog.onresult = event => {
-	  let mic = document.getElementById('mic');
+  let mic = document.getElementById('mic');
 	  mic.onclick = () => {
 		  const recog = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 		  recog.continuous = false;
