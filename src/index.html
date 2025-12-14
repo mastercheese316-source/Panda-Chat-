@@ -1,93 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1">
-				<title>PandaChat</title>
-				<style>
-  body{font-family:system-ui;margin:0;background:#f0f0f0;color:#111;overflow:hidden;display:flex;flex-direction:column;height:100vh;}
-  header{padding:1rem;background:#222;color:#fff;text-align:center;}
-  #chat{height:80vh;overflow-y:scroll;display:flex;flex-direction:column-reverse;padding:1rem;}
-   .me{background:#dd6;align-self:flex-end;}
-  .them{background:#9cf;align-self:flex-start;}
-  #input-bar{padding:1rem;background:#eee;display:flex;gap:0.5rem;}
-  input,button{font:inherit;border:none;border-radius:0.4em;padding:0.5em;}
-  input{flex:1;}
-  button{background:#4a4;color:white;cursor:pointer;}
+<html lang=en> 
+<head>
+<meta charset=utf-8>
+<meta name=viewport content=width=device-width, initial-scale=1>
+<title>PandaChat</title>
+<style>
+body{font-family:system-ui;margin:0;background:#f0f0f0;color:#111;overflow:hidden;display:flex;flex-direction:column;height:100vh;}
+header{padding:1rem;background:#222;color:#fff;text-align:center;}
+#chat{height:80vh;overflow-y:scroll;display:flex;flex-direction:column-reverse;padding:1rem;}
+.me{background:#dd6;align-self:flex-end;}
+.them{background:#9cf;align-self:flex-start;}
+#input-bar{padding:1rem;background:#eee;display:flex;gap:0.5rem;}
+input,button{font:inherit;border:none;border-radius:0.4em;padding:0.5em;}
+input{flex:1;}
+button{background:#4a4;color:white;cursor:pointer;}
 </style>
-			</head>
-			<body>
-				<header>PandaChat</header>
-				<div id="chat"></div>
-				<div id="input-bar">
-					<input id="text-box" placeholder="Say something…" autocomplete="off">
-						<button id="send">Send</button>
-						<button id=mic></button>
-					</div>
-					<script>
+</head>
+<body>
+PandaChat
+ 
+ 
+<input id=text-box placeholder=Say something… autocomplete=off>
+<button id=send>Send</button>
+<button id=mic></button>
+
+<script> 
 const chat = document.getElementById('chat');
-const box  = document.getElementById('text-box');
+const box = document.getElementById('text-box');
 const send = document.getElementById('send');
-
-
-
+const mic = document.getElementById('mic');
 const socket = new WebSocket('wss://panda-chat-s7is.onrender.com/ws/default');
-
-socket.onmessage = ev => {
-  const data = JSON.parse(ev.data);
-  if (data.type === 'translated') {
-    const side = data.sender === 'them' ? 'them' : 'me';
-    appendMsg(side, data.text);
-  }
-};
-
-navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
-  const recog = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recog.start = recog.start.bind(recog);
-  recog.continuous = true;
-  recog.lang = 'en-US';
-  recog.interimResults = false;
-
-  let mic = document.getElementById('mic');
-	  mic.onclick = () => {
-		  const recog = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-		  recog.continuous = false;
-		  recog.interimResults = false;
-		  recog.lang = 'en-US';
-		  recog.onresult = e => {
-			  const text = e.results[0][0].transcript.trim();
-			  if (text) socket.send(text);
-			  };
-		  recog.onerror = () => recog = null;
-		  recog.start().catch(console.error);
-		  };
-
-		
-function appendMsg(side, text) {
-  const p = document.createElement('p');
-  p.className = `msg ${side}`;
-  p.textContent = text;
-  chat.prepend(p);
+socket.onmessage = ev => { 
+const data = JSON.parse(ev.data);
+if (data.type === 'translated') {
+const side = data.sender === 'them' ? 'them' : 'me';
+appendMsg(side, data.text);
 }
-
-<script> socket.onmessage = (evt) => { const data = JSON.parse(evt.data);
-if (data.type === 'msg') { appendMsg(data.user, data.text);}
-else if (data.type === 'edit') { const messages = Array.from(document.querySelectorAll('.me'));
-if (messages.length) { const last = messages[messages.length - 1];
-last.textContent = data.text;}}
-const box = document.getElementById('box');
-const send = document.getElementById('send');
-const mic = document.getElementById('mic'); 
-function appendMsg(user, text) { const div = document.createElement('div');
-div.className = user; div.textContent = text;
-document.body.insertBefore(div, send); }
-send.onclick = () => { const text = box.value.trim();
-if (text) { socket.send(JSON.stringify({type: 'msg', text}));
-appendMsg('me', text); box.value = ''; } };
-mic.onclick = () => { const recog = new SpeechRecognition();
+};
+function appendMsg(side, text) {
+const p = document.createElement('p');
+p.className = msg ${side};
+p.textContent = text;
+chat.prepend(p);
+}
+send.onclick = () => {
+const text = box.value.trim();
+if (text) {
+socket.send(text);
+box.value = '';
+}
+};
+mic.onclick = () => {
+const recog = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recog.continuous = false;
+recog.interimResults = false;
 recog.lang = 'en-US';
-recog.onresult = e => { const text = e.results[0][0].transcript;
-socket.send(JSON.stringify({type: 'msg', text})); appendMsg('me', text); };
-recog.onerror = err => console.error('Mic failed:', err); recog.start();
-}; </script>
-																
+recog.onresult = e => {
+const said = e.results[0][0].transcript.trim();
+if (said) socket.send(said);
+};
+recog.onerror = () => recog = null;
+recog.start().catch(console.error);
+};
+</script>
+</body>
+</html>
